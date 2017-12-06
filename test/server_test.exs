@@ -3,7 +3,7 @@ defmodule ConnectFour.GameServerTest do
   alias ConnectFour.GameServer
 
   describe "get_state/0" do
-    test "returns state with empty board" do
+    test "returns state with empty board and current_player set to 0" do
       state = GameServer.get_state()
       assert state.board == %{a: [], b: [], c: [], d: [], e: [], f: [], g: []}
       assert state.current_player == 0
