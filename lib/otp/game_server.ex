@@ -36,18 +36,20 @@ defmodule ConnectFour.GameServer do
     {:reply, state, state}
   end
 
-  def handle_call({:drop_piece, row}, _from, state) do
-    if length(state.board[row]) < 6 do
-      {_, new_board} =
-        Map.get_and_update(state.board,
-                           row,
-                           fn current_value ->
-                             {current_value, [state.current_player | state.board[row]]}
-                           end)
-      new_state = %{board: new_board, current_player: advance_player(state.current_player)}
-      {:reply, :ok, new_state}
-    else
-      {:reply, {:error, "Row is full"}, state}
+  def handle_call({:drop_piece, row}, _from, state = %{board: board, current_player: current_player}) do
+    cond do
+      length(board[row]) < 6 ->
+        {_, new_board} =
+          Map.get_and_update(board,
+          row,
+          fn current_value ->
+            {current_value, [current_player | board[row]]}
+          end)
+
+        new_state = %{board: new_board, current_player: advance_player(current_player)}
+        {:reply, :ok, new_state}
+      true ->
+        {:reply, {:error, "Row is full"}, state}
     end
   end
 
