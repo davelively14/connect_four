@@ -11,6 +11,7 @@ defmodule ConnectFour.GameServerTest do
       state = GameServer.get_state()
       assert state.board == %{a: [], b: [], c: [], d: [], e: [], f: [], g: []}
       assert state.current_player == 0
+      assert state.status == "open"
     end
   end
 
@@ -47,11 +48,26 @@ defmodule ConnectFour.GameServerTest do
     test "resets the state" do
       GameServer.drop_piece(:a)
       state = GameServer.get_state()
-      assert state == %{board: %{a: [0], b: [], c: [], d: [], e: [], f: [], g: []}, current_player: 1}
+      assert state == %{board: %{a: [0], b: [], c: [], d: [], e: [], f: [], g: []}, current_player: 1, status: "open"}
 
       GameServer.reset()
       state = GameServer.get_state()
-      assert state == %{board: %{a: [], b: [], c: [], d: [], e: [], f: [], g: []}, current_player: 0}
+      assert state == %{board: %{a: [], b: [], c: [], d: [], e: [], f: [], g: []}, current_player: 0, status: "open"}
+    end
+  end
+
+  describe "check board conditions" do
+    test "determines a win" do
+      GameServer.drop_piece(:a)
+      GameServer.drop_piece(:a)
+      GameServer.drop_piece(:b)
+      GameServer.drop_piece(:b)
+      GameServer.drop_piece(:c)
+      GameServer.drop_piece(:c)
+      GameServer.drop_piece(:d)
+
+      state = GameServer.get_state()
+      assert state.status == "victor:0"
     end
   end
 end

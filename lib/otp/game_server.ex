@@ -1,14 +1,14 @@
 defmodule ConnectFour.GameServer do
   use GenServer
 
-  @default_state %{board: %{a: [], b: [], c: [], d: [], e: [], f: [], g: []}, current_player: 0}
+  @default_state %{board: %{a: [], b: [], c: [], d: [], e: [], f: [], g: []}, current_player: 0, status: "open"}
 
   #######
   # API #
   #######
 
-  def start_link(opts \\ []) do
-    GenServer.start_link(__MODULE__, opts, name: __MODULE__)
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
   def get_state do
@@ -27,16 +27,15 @@ defmodule ConnectFour.GameServer do
   # Callbacks #
   #############
 
-  def init(board) do
-    state = %{board: board, current_player: 0}
-    {:ok, state}
+  def init(_) do
+    {:ok, @default_state}
   end
 
   def handle_call(:get_state, _from, state) do
     {:reply, state, state}
   end
 
-  def handle_call({:drop_piece, row}, _from, state = %{board: board, current_player: current_player}) do
+  def handle_call({:drop_piece, row}, _from, state = %{board: board, current_player: current_player, status: status}) when status == "open" do
     cond do
       length(board[row]) < 6 ->
         {_, new_board} =
@@ -46,7 +45,7 @@ defmodule ConnectFour.GameServer do
             {current_value, [current_player | board[row]]}
           end)
 
-        new_state = %{board: new_board, current_player: advance_player(current_player)}
+        new_state = %{board: new_board, current_player: advance_player(current_player), status: "open"}
         {:reply, :ok, new_state}
       true ->
         {:reply, {:error, "Row is full"}, state}
@@ -58,7 +57,7 @@ defmodule ConnectFour.GameServer do
   end
 
   #####################
-  # Private Functions #
+  # Support Functions #
   #####################
 
   defp advance_player(current_player), do: rem(current_player + 1, 2)
